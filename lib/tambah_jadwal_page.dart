@@ -5,15 +5,15 @@ class TambahJadwalPage extends StatefulWidget {
 
   const TambahJadwalPage({
     super.key,
-    this.dataAwal, // ✅ TAMBAH INI
+    this.dataAwal,
   });
-  
+
   @override
   State<TambahJadwalPage> createState() => _TambahJadwalPageState();
 }
 
 class _TambahJadwalPageState extends State<TambahJadwalPage> {
-  String selectedDay = "Senin";
+  DateTime? selectedDate; // 🔥 GANTI INI
   String selectedReminder = "10 menit sebelum";
   TimeOfDay? selectedTime;
 
@@ -21,11 +21,34 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
   final TextEditingController roomController = TextEditingController();
   final TextEditingController lecturerController = TextEditingController();
 
+  /// 🔥 FORMAT JAM 24
+  String formatTime24(TimeOfDay time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return "$hour:$minute";
+  }
+
+  /// 🔥 FORMAT TANGGAL
+  String formatDate(DateTime date) {
+    final days = [
+      "Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"
+    ];
+
+    final months = [
+      "Januari","Februari","Maret","April","Mei","Juni",
+      "Juli","Agustus","September","Oktober","November","Desember"
+    ];
+
+    return "${days[date.weekday - 1]}, ${date.day} ${months[date.month - 1]} ${date.year}";
+  }
+
   void _save() {
     if (courseController.text.isEmpty ||
         roomController.text.isEmpty ||
         lecturerController.text.isEmpty ||
-        selectedTime == null) {
+        selectedTime == null ||
+        selectedDate == null) {
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Lengkapi semua data")),
       );
@@ -34,7 +57,8 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
 
     final data = {
       "title": courseController.text,
-      "time": "$selectedDay • ${selectedTime!.format(context)}",
+      "time":
+          "${formatDate(selectedDate!)} • ${formatTime24(selectedTime!)}",
       "reminder": selectedReminder,
     };
 
@@ -49,10 +73,10 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const BackButton(color: Color.fromARGB(255, 58, 212, 255)),
+        leading: const BackButton(color: Colors.black),
         title: const Text(
           "Tambah Jadwal",
-          style: TextStyle(color: Color.fromARGB(255, 30, 214, 255)),
+          style: TextStyle(color: Colors.black),
         ),
       ),
 
@@ -71,8 +95,9 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
 
             const SizedBox(height: 16),
 
+            /// 🔥 GANTI JADI DATE PICKER
             _label("Hari"),
-            _dropdown(),
+            _datePicker(),
 
             const SizedBox(height: 16),
 
@@ -99,7 +124,6 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
 
             const SizedBox(height: 20),
 
-            /// 🔥 PENGINGAT (FIX TANPA RADIO DEPRECATED)
             const Text(
               "Pengingat (Alarm)",
               style: TextStyle(fontWeight: FontWeight.w600),
@@ -126,18 +150,30 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
 
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _save,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2C3E50),
+              child: InkWell(
+                onTap: _save,
+                borderRadius: BorderRadius.circular(14),
+                child: Ink(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
+                  decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF7F7FD5),
+                        Color(0xFF86A8E7),
+                      ],
+                    ),
                   ),
-                ),
-                child: const Text(
-                  "Simpan",
-                  style: TextStyle(fontSize: 16),
+                  child: const Center(
+                    child: Text(
+                      "Simpan",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             )
@@ -147,15 +183,51 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
     );
   }
 
-  /// ================= WIDGET =================
+  /// ================= DATE PICKER =================
+  Widget _datePicker() {
+    return InkWell(
+      onTap: () async {
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2020),
+          lastDate: DateTime(2030),
+        );
+
+        if (picked != null) {
+          setState(() {
+            selectedDate = picked;
+          });
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.calendar_today_outlined),
+            const SizedBox(width: 10),
+            Text(
+              selectedDate == null
+                  ? "Pilih hari"
+                  : formatDate(selectedDate!),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// ================= WIDGET LAIN =================
 
   Widget _label(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Text(
-        text,
-        style: const TextStyle(fontWeight: FontWeight.w500),
-      ),
+      child: Text(text,
+          style: const TextStyle(fontWeight: FontWeight.w500)),
     );
   }
 
@@ -179,36 +251,22 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
     );
   }
 
-  Widget _dropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: DropdownButton<String>(
-        value: selectedDay,
-        isExpanded: true,
-        underline: const SizedBox(),
-        items: ["Senin","Selasa","Rabu","Kamis","Jumat"]
-            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-            .toList(),
-        onChanged: (val) {
-          setState(() {
-            selectedDay = val!;
-          });
-        },
-      ),
-    );
-  }
-
   Widget _timePicker() {
     return InkWell(
       onTap: () async {
         final time = await showTimePicker(
           context: context,
           initialTime: TimeOfDay.now(),
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                alwaysUse24HourFormat: true,
+              ),
+              child: child!,
+            );
+          },
         );
+
         if (time != null) {
           setState(() {
             selectedTime = time;
@@ -228,7 +286,7 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
             Text(
               selectedTime == null
                   ? "Pilih jam mulai"
-                  : selectedTime!.format(context),
+                  : formatTime24(selectedTime!),
             ),
           ],
         ),
@@ -236,7 +294,6 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
     );
   }
 
-  /// 🔥 RADIO CUSTOM (NO DEPRECATED)
   Widget _radioCustom(String text) {
     final isSelected = selectedReminder == text;
 
@@ -251,12 +308,12 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF2C3E50).withValues(alpha: 0.1)
+              ? const Color(0xFF7F7FD5).withValues(alpha: 0.1)
               : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF2C3E50)
+                ? const Color(0xFF7F7FD5)
                 : Colors.grey.shade300,
           ),
         ),
@@ -267,7 +324,7 @@ class _TambahJadwalPageState extends State<TambahJadwalPage> {
                   ? Icons.radio_button_checked
                   : Icons.radio_button_off,
               color: isSelected
-                  ? const Color(0xFF2C3E50)
+                  ? const Color(0xFF7F7FD5)
                   : Colors.grey,
             ),
             const SizedBox(width: 10),

@@ -82,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                         backgroundColor: const Color.fromARGB(255, 54, 205, 255),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      child: const Text("Continue"),
+                      child: const Text("LANJUT!"),
                     ),
                   ),
                 ],
