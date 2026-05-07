@@ -1,232 +1,452 @@
 import 'package:flutter/material.dart';
+import 'tambah_jadwal_page.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePage extends StatefulWidget {
+  final String nama;
+
+  const HomePage({
+    super.key,
+    required this.nama,
+  });
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+
+  List<Map<String, String>> jadwalList = [];
+
+  /// 🎨 WARNA CARD
+  final List<Color> colors = [
+    const Color(0xFF6C5CE7),
+    const Color(0xFF00B894),
+    const Color(0xFFFDCB6E),
+    const Color(0xFF0984E3),
+  ];
+
+  /// 🎨 ICON CARD
+  final List<IconData> icons = [
+    Icons.code_rounded,
+    Icons.storage_rounded,
+    Icons.account_tree_rounded,
+    Icons.language_rounded,
+  ];
+
+  /// ➕ TAMBAH JADWAL
+  Future<void> _tambahJadwal() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const TambahJadwalPage(),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        jadwalList.add(Map<String, String>.from(result));
+      });
+    }
+  }
+
+  /// ✏️ EDIT JADWAL
+  Future<void> _editJadwal(int index) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TambahJadwalPage(
+          dataAwal: jadwalList[index],
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        jadwalList[index] = Map<String, String>.from(result);
+      });
+    }
+  }
+
+  /// 🗑️ HAPUS JADWAL
+  void _hapusJadwal(int index) {
+    setState(() {
+      jadwalList.removeAt(index);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Jadwal berhasil dihapus"),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: const Color(0xFFF6F7FB),
 
-      // 🔻 BOTTOM NAVBAR
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "",
+      /// 🔥 DRAWER
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+
+            /// HEADER
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Colors.black,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+
+                  const CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.person,
+                      color: Colors.black,
+                      size: 30,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    widget.nama,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const Text(
+                    "Mahasiswa",
+                    style: TextStyle(
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            /// MENU
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text("Beranda"),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.calendar_month),
+              title: const Text("Kalender"),
+              onTap: () {
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Fitur kalender segera hadir"),
+                  ),
+                );
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text("Notifikasi"),
+              onTap: () {
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Belum ada notifikasi"),
+                  ),
+                );
+              },
+            ),
+
+            const Divider(),
+
+            ListTile(
+              leading: const Icon(
+                Icons.logout,
+                color: Colors.red,
+              ),
+              title: const Text(
+                "Logout",
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+
+      /// 🔥 APPBAR
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(
+              Icons.menu,
+              color: Colors.black,
+            ),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: "",
+        ),
+
+        title: const Text(
+          "Smart Class Reminder",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: "",
-          ),
+        ),
+
+        centerTitle: true,
+
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(
+              Icons.notifications_none,
+              color: Colors.black,
+            ),
+          )
         ],
       ),
 
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-
-              // 🔹 HEADER (LEBIH MODERN)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Icon(Icons.menu),
-                  Column(
-                    children: const [
-                      Text(
-                        "Smart Class",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        "Reminder",
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                  const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.blue,
-                    child: Icon(Icons.person, color: Colors.white),
-                  )
-                ],
-              ),
-
-              const SizedBox(height: 25),
-
-              // 🔹 GREETING (FITUR BARU)
-              const Text(
-                "Halo 👋",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const Text(
-                "Siap untuk kuliah hari ini?",
-                style: TextStyle(color: Colors.grey),
-              ),
-
-              const SizedBox(height: 25),
-
-              // 🔹 CARD INFO (FITUR BARU)
-              Container(
-                padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Colors.blue, Colors.lightBlueAccent],
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Jadwal Hari Ini",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          "2 Mata Kuliah",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Icon(Icons.calendar_month, color: Colors.white, size: 40)
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 25),
-
-              // 🔹 LIST HEADER
-              const Text(
-                "Menu Utama",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // 🔹 GRID MENU
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20,
-                  children: const [
-                    MenuItem(
-                      icon: Icons.menu_book,
-                      title: "Mata Kuliah",
-                      color: Colors.blue,
-                    ),
-                    MenuItem(
-                      icon: Icons.meeting_room,
-                      title: "Ruang",
-                      color: Colors.pink,
-                    ),
-                    MenuItem(
-                      icon: Icons.access_time,
-                      title: "Jam",
-                      color: Colors.green,
-                    ),
-                    MenuItem(
-                      icon: Icons.person,
-                      title: "Dosen",
-                      color: Colors.purple,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// 🔥 MENU ITEM (DITAMBAH FITUR TAP)
-class MenuItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Color color;
-
-  const MenuItem({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
-      onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("$title diklik")),
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade200,
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
+      /// 🔥 BODY
+      body: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            // 🔹 ICON BULAT
-            Container(
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color,
-              ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 28,
+            /// 👋 GREETING
+            Text(
+              "Halo, ${widget.nama}! 👋",
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 4),
 
-            Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
+            const Text(
+              "Ini jadwal kuliahmu hari ini",
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
               ),
-            )
+            ),
+
+            const SizedBox(height: 20),
+
+            /// 📚 LIST JADWAL
+            Expanded(
+              child: jadwalList.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "Belum ada jadwal",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: jadwalList.length,
+                      itemBuilder: (context, index) {
+
+                        final item = jadwalList[index];
+                        final color = colors[index % colors.length];
+                        final icon = icons[index % icons.length];
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 12,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+
+                          child: Row(
+                            children: [
+
+                              /// 🌈 GARIS KIRI
+                              Container(
+                                width: 5,
+                                height: 110,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(14),
+                                  child: Row(
+                                    children: [
+
+                                      /// 🎨 ICON
+                                      Container(
+                                        width: 55,
+                                        height: 55,
+                                        decoration: BoxDecoration(
+                                          color: color.withValues(alpha: 0.15),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          icon,
+                                          color: color,
+                                          size: 28,
+                                        ),
+                                      ),
+
+                                      const SizedBox(width: 14),
+
+                                      /// 📄 INFO
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+
+                                            Text(
+                                              item["title"] ?? "",
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 8),
+
+                                            Row(
+                                              children: [
+
+                                                const Icon(
+                                                  Icons.access_time,
+                                                  size: 16,
+                                                  color: Colors.grey,
+                                                ),
+
+                                                const SizedBox(width: 4),
+
+                                                Text(
+                                                  item["time"] ?? "",
+                                                  style: const TextStyle(
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                            const SizedBox(height: 4),
+
+                                            Row(
+                                              children: [
+
+                                                const Icon(
+                                                  Icons.location_on_outlined,
+                                                  size: 16,
+                                                  color: Colors.grey,
+                                                ),
+
+                                                const SizedBox(width: 4),
+
+                                                Text(
+                                                  item["room"] ?? "-",
+                                                  style: const TextStyle(
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      /// 🔥 MENU TITIK 3
+                                      PopupMenuButton<String>(
+                                        onSelected: (value) {
+
+                                          if (value == "edit") {
+                                            _editJadwal(index);
+                                          }
+
+                                          if (value == "hapus") {
+                                            _hapusJadwal(index);
+                                          }
+                                        },
+                                        itemBuilder: (context) => const [
+
+                                          PopupMenuItem(
+                                            value: "edit",
+                                            child: Text("Edit"),
+                                          ),
+
+                                          PopupMenuItem(
+                                            value: "hapus",
+                                            child: Text("Hapus"),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
           ],
         ),
+      ),
+
+      /// ➕ FLOATING BUTTON
+      floatingActionButton: FloatingActionButton(
+        onPressed: _tambahJadwal,
+        backgroundColor: Colors.black,
+        child: const Icon(Icons.add),
+      ),
+
+      /// 🔻 BOTTOM NAVBAR
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        items: const [
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Beranda",
+          ),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: "Kalender",
+          ),
+        ],
       ),
     );
   }

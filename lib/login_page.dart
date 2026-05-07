@@ -9,32 +9,25 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController nimCtrl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController nama = TextEditingController();
 
-  void masuk() {
-    if (nimCtrl.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("NIM wajib diisi")),
+  void lanjut() {
+    if (_formKey.currentState!.validate()) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            nama: nama.text,
+          ),
+        ),
       );
-      return;
-    }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const HomePage()),
-    );
-  }
-
-  void autoLogin(String value) {
-    // 👉 ubah sesuai panjang NIM kamu
-    if (value.length >= 10) {
-      masuk();
     }
   }
 
   @override
   void dispose() {
-    nimCtrl.dispose();
+    nama.dispose();
     super.dispose();
   }
 
@@ -42,45 +35,60 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const Text(
+                    "Smart Class Reminder",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
 
-            const Text(
-              "Login Mahasiswa",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+                  const SizedBox(height: 40),
+
+                  const Text(
+                    "Masukkan nama kamu untuk memulai",
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  TextFormField(
+                    controller: nama,
+                    validator: (v) =>
+                        v == null || v.isEmpty ? "Nama wajib diisi" : null,
+                    decoration: InputDecoration(
+                      hintText: "Nama",
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: lanjut,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 54, 205, 255),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text("Continue"),
+                    ),
+                  ),
+                ],
               ),
             ),
-
-            const SizedBox(height: 30),
-
-            // 🔹 INPUT NIM
-            TextField(
-              controller: nimCtrl,
-              keyboardType: TextInputType.number,
-              onChanged: autoLogin, // 🔥 AUTO LOGIN
-              decoration: const InputDecoration(
-                labelText: 'NIM',
-                hintText: 'Masukkan NIM',
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // 🔹 BUTTON LOGIN (TETAP ADA)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: masuk,
-                child: const Text("Login"),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
