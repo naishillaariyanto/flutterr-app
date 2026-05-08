@@ -15,7 +15,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.new.packagename"
+    namespace = "com.smartclassreminder.packagename"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
