@@ -1,4 +1,4 @@
-package com.new.packagename
+package com.smartclassreminder.app
 
 import io.flutter.embedding.android.FlutterActivity
 
